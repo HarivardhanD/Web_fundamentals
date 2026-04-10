@@ -35,7 +35,8 @@
 
 - In our case, we used the tool : `dnsrecon`
 
-- The command is as folloes : `dnsrecon -t brt -d acmeitsupport.thm`
+- The command is as folloes : `dnsrecon -t brt -d acmeitsupport.thm` where:
+    - brt --> brute force
 
 
 ## OSINT -SubList3r

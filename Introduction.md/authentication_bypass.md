@@ -25,7 +25,7 @@
     - `-H` will let us add headers
         - Here we used content-type for -H because we are filling form 
     - `-u` set target URL
-    - `-mr` this says, tell me when "user already exist message" pops up
+    - `-mr`[match regex] this says, tell me when "user already exist message" pops up
     - In the ffuf tool, the FUZZ keyword signifies where the contents from our wordlist will be inserted in the request.
 
 - Why u use POST? 
@@ -57,6 +57,8 @@
 
 - This is the condition when the authentication code isnt well written , which can lead to  bypass of the authentication 
 
+- A logic flaw occurs when an application makes authorization decisions based on request properties (such as URLs or parameters) instead of consistently validating the user’s identity and permissions.
+
 - So I studied 2 kinds here :
 
 #### Logic Flaw Example
@@ -72,20 +74,50 @@ if( url.substr(0,6) === '/admin') {
 
 - So its in PHP and in PHP `===` means comparison, ie `admin` should be equal to `admin` , only then it will go to if condition
 
+- These are just small reason for logic flaw, but majorily is due server not checking the user authorization and only verifying when /admin is in URL
+
 - Now, this is flaw, because , see the `(url.substr(0.6)==='/admin')` it only alows users if ID == admin, else it send the user to else part ( webserver)
 
-- So now lets understnand what happens :
-    - So we have a lobby , a cafe and admin room
-    - There is a bouncer , stadning btw admin and cafe 
-    - so , a normal user comes and say , admin and when he says that , the bouncer says, give ur id else ur not allowed for admin room
-    - user shows his ID and ID = DOG, ie admin != DOG, so bouncer send him to HALL, in HALL user shows his ID to server and server send him to cafe ( since ID != admin)
-    - Now comes the hacker, he too says bouncer , he wanna go to admin and bouncer ask for ID
-    - Hacker shows ID as `aDmin ` and bouncer be like, its wrong go to hallway
-    - Now, security is good ! , so whats the flaw??
-    - Now hacker coomes to server and say, i wanna go to admin and shows his ID as ` aDmin`
-    - So , server being smart, things, ah he has made a mistake , but ik what u mean adn where u wanna go
-    - Hence , server lets him in admin room.
-    - This happens because server doesnt check case sensitivity 
+- `Security decisions must be based on WHO the user is, not WHAT the URL looks like.`
+- The Building Setup
+
+    - There is a building, Inside are:
+        - A café (public)
+        - An admin room (restricted)
+
+    - There is ONE rule:
+        - Only admins may enter the admin room
+
+- How the system is wrongly designed
+- There is a bouncer, but he behaves incorrectly.
+- The bouncer does not always check IDs.
+
+- Instead, he follows this rule:
+
+    - “I will only check someone’s ID if they say the exact word admin.”
+    
+    - This is the logic flaw.
+
+- Normal user flow
+    - A normal user walks in and says:
+    - “I want to go to the café”
+
+    - The bouncer says:
+    - “Okay, no ID needed”
+
+- User goes to café (correct behavior)
+
+- Hacker flow (the bypass)
+
+- The hacker walks in and says:
+    -  “I want to go to adMin”
+
+    - The bouncer thinks:
+    - “That’s not exactly admin, so I won’t check ID”
+
+- The bouncer lets the hacker walk past without checking anything
+    - Inside the building, the hallway still leads to the admin room
+    - The hacker enters the admin room without ever showing an ID
 
 - To resolve it , we can write the same code as follows : 
 
@@ -108,7 +140,7 @@ if($lowercase_url === '/admin') {
 - So , this is pure ` GET , POST , REQUEST ` METHOD manipulation
 
 - So for this i used `curl` command.
-- Here , the developer's mistake was using `REQUEST`    METHOD instead of `POST`
+- Here , the developer's mistake was using `REQUEST` for PHP    METHOD instead of `POST`
 - Maybe due to laziness or to skip a level of thinking 
 - SO now, ` curl 'http://10.48.172.55/customers/reset?email=robert%40acmeitsupport.thm' -H 'Content-Type: application/x-www-form-urlencoded' -d 'username=robert'` , here i use curl to talk to webiste, this is to check if email is sent to robert or no !, just random checking.
 - In email, we used `%` instead of `@` because, URL sometimes confuses itself for `@` as username and might give error.

@@ -63,7 +63,7 @@ Character	Encoded
 
 ## FINDING AN SSRF
 
-- Easy to fini few SSRF such as :
+- Easy to find few SSRF such as :
 
     - When a full URL is used in a parameter in the address bar:
         - EX: https://website.thm/form?`server=server.website.thm/flag`
