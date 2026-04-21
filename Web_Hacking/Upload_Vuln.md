@@ -167,3 +167,75 @@
 ##
 
 # BYPASSIING SERVER-SIDE FILTERING --> MAGIC NUMBERS
+
+- When i tried to upload files --> it said only gif allowed
+- But i had a dem.php file as a shell.
+- so i did the following :
+    - in terminal --> `file dem.php` showed me the type of file dem was and it showed php
+    - Then i went to google and searched `hex for gif`
+    - I got `GIF87a` . So i pasted this in the top line of the dem.php and again when i checked the file type --> it showed `.gif`
+    - Then uploaded it and listen to it via the nc
+
+
+# BLACK - BOX TESTING --> UPLOAD VULN 
+
+### STEP BY STEP APPROACH .
+
+1. UNDERSTAND THE WEBSITE .
+- Features of the website [ `wappalyzer`]
+- Burp-sutie [request - response]
+
+2. CLIENT SIDE SCRIPTS
+
+- Inspect 
+
+3. UPLOAD NORMAL FILES AND FILES WITH WEIRD EXTENSIONS
+
+- Verify it its accessible on browser or no [ `GOBUSTER`]
+- Check if extension is blacklist or whitelist 
+
+4. TRY UPLOADING MALICIOUS FILES 
+
+- If the website changes the name after upload , in orderr to find the file u uploaded , u can use `-x` switch of the gobuster with the extension [ `-x php` will search endoints with .php]
+
+5. CHECK WHAT EXTENSION FILTERINIGS ARE USED
+
+- EXTENSION FILTERING
+- MAGIC NUMBERS FILTERING
+- MAX FILE SIZE FILTERING
+- MIME TYPES  FILTERING
+
+
+
+### -- SOLUTIION
+
+- VIA WAPPALYZER I FOUND --> JSQUERY
+- IN the inspect --> i saw --> accept = `image/jpg` --> lets try this out !
+    - so i found out it only accepts --> .jpg [ whitelist ]
+
+- Then in inspect , i went to network tab where i found :
+    - `nginx` --> server handling request
+    - `x-powered : Express` --> which means , the backend might be node.js ie EXPRESS
+
+- Now i feel this happening behind the scenes :
+    - i click button
+    - req captured by `nginx`
+    - sent to the ubuntu[ OS server ] where Express is running
+
+- Now i captured the upload req via burp
+
+- Now my goal is to check :
+    - WHITELIST CONFIRMED
+    - Is MIME filtering used?
+    - is magic numbers filtering used?
+    - Will it work if i use magic numbers in file?
+
+- I tried changing the `conten-type` to `image/png`, `image/gif` etc, none worked
+- Then On Burp suite --> I changed the thm.jpg [ file-type: jpg ] to thm.php.jpg and it worked --> showed success
+
+- Then i tried to check if magic numbers can be bypassed 
+    - I created `dem.php` and then using `cat` concatinated .php and .jpg files
+    - ` cat THM.jpg dem.php > output.jpg` and when i uploaded `output.jpg` it showed successfull
+
+- I used Gobuster to find all endpoint , but i need to find where the uploaded file was , so that i can then access it and execute
+   
